@@ -10,12 +10,12 @@ const fs = require('fs'),
 const SJ = require('./');
 
 const data = [
-  { name: 'Washington', id: 1 },
-  { name: 'Adams', id: 2 },
-  { name: 'Jefferson', id: 3 },
-  { name: 'Madison', id: 4 },
-  { name: 'Monroe', id: 5 },
-  { name: 'Adams', id: 6 },
+    { name: 'Washington', id: 1 },
+    { name: 'Adams', id: 2 },
+    { name: 'Jefferson', id: 3 },
+    { name: 'Madison', id: 4 },
+    { name: 'Monroe', id: 5 },
+    { name: 'Adams', id: 6 },
 ];
 
 describe('sqliteToJson', function () {
@@ -27,11 +27,11 @@ describe('sqliteToJson', function () {
         const db = new sqlite.Database('./tmp/tmp.db');
         this.sqlitejson = SJ(db);
 
-        db.serialize(function(e) {
+        db.serialize(function (e) {
             db.run("CREATE TABLE presidents (name TEXT, id INT)");
             var stmt = db.prepare("INSERT INTO presidents VALUES (?, ?)");
 
-            data.forEach(function(row) {
+            data.forEach(function (row) {
                 stmt.run(row.name, row.id);
             });
 
@@ -40,18 +40,18 @@ describe('sqliteToJson', function () {
             done(e);
         });
 
-        desired = data.reduce(function(o, v) { o[v.name] = v; return o; }, {});
+        desired = data.reduce(function (o, v) { o[v.name] = v; return o; }, {});
 
         this.command = 'node ./bin/sqlite-json.js';
     });
 
-    it('accepts a filename', function() {
+    it('accepts a filename', function () {
         var sj = SJ('tmp/foo.db');
         sj.should.be.an.instanceOf(SJ);
     });
 
     it('calls back with all tables in the specified database', function (done) {
-        this.sqlitejson.tables(function(e, result) {
+        this.sqlitejson.tables(function (e, result) {
             result.should.have.length(1);
             result.should.be.containDeep(['presidents']);
             done(e);
@@ -59,7 +59,7 @@ describe('sqliteToJson', function () {
     });
 
     it('exports a table to JSON', function (done) {
-        this.sqlitejson.json({table: 'presidents'}, function (err, json) {
+        this.sqlitejson.json({ table: 'presidents' }, function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), data);
             done(err);
         });
@@ -67,9 +67,9 @@ describe('sqliteToJson', function () {
 
     it('saves a table in a database to a file', function (done) {
         var dest = 'tmp/bar';
-        this.sqlitejson.save({table: 'presidents'}, dest, function (err, data) {
+        this.sqlitejson.save({ table: 'presidents' }, dest, function (err, data) {
 
-            if (!err) 
+            if (!err)
                 should.deepEqual(
                     JSON.parse(data),
                     JSON.parse(fs.readFileSync(dest)),
@@ -80,39 +80,39 @@ describe('sqliteToJson', function () {
     });
 
     it('accepts a key option', function (done) {
-        const desired = data.reduce(function(o, v) { o[v.name] = v; return o; }, {});
-        this.sqlitejson.json({table: 'presidents', key: "name"}, function (err, json) {
+        const desired = data.reduce(function (o, v) { o[v.name] = v; return o; }, {});
+        this.sqlitejson.json({ table: 'presidents', key: "name" }, function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), desired);
             done(err);
         });
     });
 
     it('attaches a key to the output', function (done) {
-        const desired = data.reduce(function(o, v) { o[v.name] = v; return o; }, {});
-        this.sqlitejson.json({table: 'presidents', key: "name", columns: ["id"]}, function (err, json) {
+        const desired = data.reduce(function (o, v) { o[v.name] = v; return o; }, {});
+        this.sqlitejson.json({ table: 'presidents', key: "name", columns: ["id"] }, function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), desired);
             done(err);
         });
     });
 
     it('filters with a where option', function (done) {
-        const desired = data.filter(function(i) { return i.name == 'Adams'; }, {});
-        this.sqlitejson.json({table: 'presidents', where: "name = 'Adams'"}, function (err, json) {
+        const desired = data.filter(function (i) { return i.name == 'Adams'; }, {});
+        this.sqlitejson.json({ table: 'presidents', where: "name = 'Adams'" }, function (err, json) {
             if (!err) should.deepEqual(json, JSON.stringify(desired));
             done(err);
         });
     });
 
     it('filters with a columns option', function (done) {
-        const desired = data.map(function(i) { return {"name": i.name}; }, {});
-        this.sqlitejson.json({table: 'presidents', columns: ["name"]}, function (err, json) {
+        const desired = data.map(function (i) { return { "name": i.name }; }, {});
+        this.sqlitejson.json({ table: 'presidents', columns: ["name"] }, function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), desired);
             done(err);
         });
     });
 
     it('accepts SQL with a callback', function (done) {
-        const desired = data.map(function(i) { return {"name": i.name}; }, {});
+        const desired = data.map(function (i) { return { "name": i.name }; }, {});
         this.sqlitejson.json("select name from presidents", function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), desired);
             done(err);
@@ -126,7 +126,7 @@ describe('sqliteToJson', function () {
             key: "name",
             where: "id == 1"
         },
-            desired = {"Washington": {"name": "Washington"}};
+            desired = { "Washington": { "name": "Washington" } };
 
         this.sqlitejson.json(opts, function (err, json) {
             if (!err) should.deepEqual(JSON.parse(json), desired);
@@ -136,14 +136,14 @@ describe('sqliteToJson', function () {
 
     it('cli works with options', function (done) {
         args = [
-                "./tmp/tmp.db",
-                '--table',
-                'presidents'
-            ];
+            "./tmp/tmp.db",
+            '--table',
+            'presidents'
+        ];
 
         fixture = JSON.stringify();
 
-        child.exec(this.command +" "+ args.join(' '), function(e, result, err) {
+        child.exec(this.command + " " + args.join(' '), function (e, result, err) {
             if (e) throw e;
             if (err) {
                 console.error("");
@@ -160,13 +160,13 @@ describe('sqliteToJson', function () {
     it('cli works with SQL', function (done) {
 
         nodeargs = [
-                "./tmp/tmp.db",
-                '"SELECT * FROM presidents;"'
-            ];
+            "./tmp/tmp.db",
+            '"SELECT * FROM presidents;"'
+        ];
 
         fixture = JSON.stringify();
 
-        child.exec(this.command +" "+ nodeargs.join(' '), function(e, result, err) {
+        child.exec(this.command + " " + nodeargs.join(' '), function (e, result, err) {
             if (e) throw e;
             if (err) {
                 console.error("");
@@ -184,15 +184,15 @@ describe('sqliteToJson', function () {
     it('cli SQL overrides options', function (done) {
 
         nodeargs = [
-                "./tmp/tmp.db",
-                '"SELECT * FROM presidents;"',
-                "--where",
-                "id==1"
-            ];
+            "./tmp/tmp.db",
+            '"SELECT * FROM presidents;"',
+            "--where",
+            "id==1"
+        ];
 
         fixture = JSON.stringify();
 
-        child.exec(this.command +" "+ nodeargs.join(' '), function(e, result, err) {
+        child.exec(this.command + " " + nodeargs.join(' '), function (e, result, err) {
             if (e) throw e;
             if (err) {
                 console.error("");
@@ -207,7 +207,7 @@ describe('sqliteToJson', function () {
         });
     });
 
-    after(function(){
+    after(function () {
         rimraf('./tmp');
     });
 });
